@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>19 letters</title>
+  <link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=Cormorant+Garamond:ital,wght@0,400;1,400&family=Caveat:wght@400;600&family=Dancing+Script:wght@500&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: #1e2418; min-height: 100vh; display: flex; justify-content: center; align-items: flex-start; padding: 40px 0; font-family: 'Cormorant Garamond', serif; overflow-y: auto; }
+    .book-wrap { width: 95vw; max-width: 850px; min-height: 200vh; position: relative; }
+    .book { width: 100%; min-height: 200vh; position: relative; }
+    .page.cover { position: absolute; width: 100%; min-height: 2000px; top: 0; left: 0; background: #2a2418; background-image: linear-gradient(to bottom, rgba(0,0,0,0.15), rgba(0,0,0,0.85)), url('https://plain-apac-prod-public.komododecks.com/202610/20/uHO0VBP56O5tixqIpoXs/image.png'); background-size: cover; background-position: center; border-radius: 4px; box-shadow: 0 0 0 8px #2b2216, 0 0 0 12px #4a3d2a, 0 15px 50px rgba(0,0,0,0.6); padding: 80px 65px 120px 65px; color: white; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; opacity: 0; pointer-events: none; transform: rotateY(-10deg); transition: all 0.8s ease; overflow: hidden; }
+    .page.cover.active { opacity: 1; pointer-events: auto; transform: rotateY(0deg); position: relative; }
+    .page.cover.prev { opacity: 0; transform: rotateY(15deg) translateX(-30px); position: absolute; }
+    .page:not(.cover) { position: absolute; width: 100%; min-height: 2000px; top: 0; left: 0; background: #efe6ce; background-image: url('https://www.transparenttextures.com/patterns/old-paper.png'), url('https://www.transparenttextures.com/patterns/natural-paper.png'), url('https://www.transparenttextures.com/patterns/paper-fibers.png'); background-blend-mode: multiply, multiply, normal; border-radius: 2px 4px 4px 2px; box-shadow: 0 0 0 8px #3a2e1f, 0 0 0 12px #5a4632, 0 15px 50px rgba(0,0,0,0.6); padding: 80px 65px 120px 65px; opacity: 0; pointer-events: none; transform: rotateY(-10deg); transition: all 0.8s ease; overflow: hidden; }
+    .page:not(.cover).active { opacity: 1; pointer-events: auto; transform: rotateY(0deg); position: relative; }
+    .page:not(.cover).prev { opacity: 0; transform: rotateY(15deg) translateX(-30px); position: absolute; }
+    .page:not(.cover)::after { content: ''; position: absolute; right: 0; top: 0; bottom: 0; width: 18px; background: repeating-linear-gradient(to bottom, #4a3a28 0px, #5c4a35 12px, #3e3223 24px); opacity: 0.8; border-radius: 0 4px 4px 0; }
+    .paper-fiber { position: absolute; inset: 0; background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png'); opacity: 0.3; pointer-events: none; mix-blend-mode: multiply; }
+    .page.crumple-light { background-image: url('https://www.transparenttextures.com/patterns/old-paper.png'), url('https://www.transparenttextures.com/patterns/paper-fibers.png'), radial-gradient(ellipse at 30% 20%, rgba(0,0,0,0.03) 0%, transparent 50%); }
+    .page.crumple-medium { background-color: #e8dcc0; background-image: url('https://www.transparenttextures.com/patterns/rice-paper-2.png'), url('https://www.transparenttextures.com/patterns/old-paper.png'); }
+    .page.crumple-heavy { background-color: #e2d4b0; background-image: url('https://www.transparenttextures.com/patterns/rice-paper-2.png'), url('https://www.transparenttextures.com/patterns/wrinkled-paper.png'), url('https://www.transparenttextures.com/patterns/old-paper.png'); }
+    .page.tears { background-color: #e9dcc1; }
+    .tear-stain { position: absolute; pointer-events: none; z-index: 5; opacity: 0.55; }
+    .tear-stain.one { top: 18%; left: 32%; width: 110px; height: 190px; background: radial-gradient(ellipse at center, rgba(110,125,145,0.28) 0%, transparent 70%); filter: blur(1px); transform: rotate(-7deg); }
+    .tear-stain.one::after { content: ''; position: absolute; top: 60px; left: 40px; width: 2px; height: 75px; background: linear-gradient(to bottom, rgba(110,125,145,0.3), transparent); }
+    .tear-stain.two { top: 48%; left: 58%; width: 90px; height: 140px; background: radial-gradient(ellipse at center, rgba(100,115,135,0.24) 0%, transparent 65%); filter: blur(1.2px); }
+    .tear-stain.three { bottom: 28%; left: 22%; width: 65px; height: 95px; background: radial-gradient(ellipse at center, rgba(120,130,140,0.2) 0%, transparent 60%); }
+    .page.cursive .letter { font-family: 'Caveat', cursive; }
+    .page.cursive .letter p { font-family: 'Caveat', cursive; font-size: 26px; line-height: 1.6; color: #2b2216; }
+    .page.cursive .letter h2 { font-family: 'Dancing Script', cursive; font-size: 42px; font-weight: 500; }
+    .page.cursive .letter-head { font-family: 'Special Elite', monospace; }
+    .cover-content { position: relative; z-index: 2; width: 100%; max-width: 400px; padding: 20px; }
+    .cover h1 { font-size: clamp(32px, 6vw, 52px); font-weight: 400; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 15px; text-shadow: 0 2px 20px rgba(0,0,0,0.8); }
+    .cover p { font-family: 'Special Elite', monospace; font-size: 16px; opacity: 0.8; letter-spacing: 0.2em; margin-bottom: 40px; }
+    .password-box { background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; padding: 25px; margin-top: 20px; }
+    .password-box label { font-family: 'Special Elite', monospace; font-size: 12px; letter-spacing: 0.2em; opacity: 0.7; display: block; margin-bottom: 12px; }
+    .password-box input { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 12px 15px; font-family: 'Special Elite', monospace; font-size: 16px; border-radius: 8px; outline: none; text-align: center; }
+    .password-box button { margin-top: 15px; width: 100%; background: #f4ecd8; color: #2b2216; border: none; padding: 12px; font-family: 'Special Elite', monospace; font-size: 13px; letter-spacing: 0.2em; border-radius: 8px; cursor: pointer; }
+    .error-msg { font-family: 'Special Elite', monospace; color: #ff9a8a; font-size: 12px; margin-top: 12px; opacity: 0; display: block; min-height: 18px; }
+    .error-msg.show { opacity: 1; }
+    .hint { font-family: 'Special Elite', monospace; font-size: 10px; opacity: 0.4; margin-top: 15px; letter-spacing: 0.15em; }
+    .letter { font-family: 'Special Elite', monospace; color: #3a2e1f; line-height: 2.2; position: relative; z-index: 2; }
+    .letter-head { display: flex; justify-content: space-between; font-size: 13px; opacity: 0.5; margin-bottom: 50px; border-bottom: 1px dashed #8a7a60; padding-bottom: 12px; }
+    .letter h2 { font-family: 'Cormorant Garamond', serif; font-style: italic; font-weight: 400; font-size: 36px; margin-bottom: 35px; color: #2b2216; min-height: 1.2em; }
+    .letter p { margin-bottom: 28px; font-size: 19px; min-height: 1em; }
+    .nav { position: absolute; bottom: 30px; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 35px; z-index: 10; }
+    .nav button { background: #3a2e1f; color: #f4ecd8; border: none; padding: 12px 22px; font-family: 'Special Elite', monospace; cursor: pointer; border-radius: 20px; }
+    .page-num { font-family: 'Special Elite', monospace; font-size: 12px; opacity: 0.4; color: #3a2e1f; }
+     .page.dark-gloomy{
+  background-color:#0f0e0a !important;
+  background-image: 
+    radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.95) 85%),
+    url('https://www.transparenttextures.com/patterns/dark-paper.png') !important;
+  box-shadow:0 0 0 8px #0a0907, 0 0 0 12px #1a1814, 0 25px 90px rgba(0,0,0,1) !important;
+}
+
+.page.cover.opening {
+  transform: rotateY(-135deg);
+}
+
+.page.cover.opened {
+  transform: rotateY(-180deg);
+  pointer-events: none;
+}
+
+
+</style>
+  </style>
+</head>
+<body>
+  <div class="book-wrap">
+    <div class="book" id="book">
+
+      <!-- COVER -->
+      <div class="page cover active" data-page="1">
+        <div class="cover-content">
+          <h1>"...Our Letters."</h1>
+          <p>"Pages of what we left behind"</p>
+          <div class="password-box">
+            <label>"You keep telling me this phrase."</label>
+            <input type="password" id="passInput" placeholder="..." onkeydown="if(event.key==='Enter') checkPass()">
+            <button onclick="checkPass()">Read?</button>
+            <span class="error-msg" id="errorMsg"> </span>
+            <div class="hint">"Spice of an Oak, A whisper of breeze. Two names, one part of each."</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- LETTER 1 -->
+      <div class="page crumple-light" data-page="2">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>June 12, 2042</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>Hii Cody!!</h2>
+          <p>im so hoping that youre reading this just like we planned. this will be our secret letter spot heheheh!! im pretty sure we'll just leave them at this tree every once in a while if we wanted to, but if anything really happens then we could write our letters here! so...</p>
+          <p>Do you mind if i could ask for any more of the notes we have for the following semester?? please please please i really need some pleaseeeee. Yeah i know this is very abrupt and sudden but!!! ill help out with the supplies for your stageplay soon, seriously though i dont mind if youd actually gave me the notes or not, im still giving youu supplies LOL</p>
+          <p>Also have you heard about the whole gang fight at the mall? geez our city has thug problems, be sure to keep an eye on yourself and others! i dont want you to be all messed up from those rascals! genuinely.. dont.. please.. but anyway</p>
+          <p> hope your archery is doing fine! Sir said you were doing amazing back there! well, i couldnt watch how cool you were.. man....... but i really wanna see you look cool and act tough. youve got so much talent being a nerd and a jock at the same time hehe.. but thank you for reading this message, i appreciate it! if you arent.. youre poo poo ;P</p>
+          <p>Sincerely, Winfred duhrr</p>
+
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">1 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 2 -->
+       <div class="page cursive" data-page="3">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head">
+            <span>August 29, 2042</span>
+            <span>721 Gumaclod Street, Nevashwick City, Savarov</span>
+          </div>
+          <h2>Greetings, Winfred</h2>
+          <p>Hello again Winfred, I hate to inform you that Ossa and Luo have been spreading rumors about you. I have tried to warn them about their actions but it seems that they won't stop. Please be aware of everything they do, I do not want you to be in trouble or have any sort of problems sooner.</p>
+          <p>I heard they say that you've allegedly bullied Harvey? It shocked everyone in the friend group really.. It doesn't even make sense since I've talked to him about it and he had no clue as well. I'm not too sure why they're doing this, but I'm definitely sure that they're jealous of what you did or might've done. Probably from winning the games during the Mask Designing Event. After all they only got second place because of our first place. I worry enough for you since they're probably scared of me so it led to them targeting you, just be careful aight? Tomorrow, we can deal with them, I already asked Sir Diago.</p>
+          <p>Don't worry about me and the others, we know very well that you wouldn't do such a thing. Amica's too pissed right now, she wants to punch the two of them haha.. Corwin and Ruth will message you in a while, Samir and I will clean up the classroom later so if you need anything else, tell us.</p>
+          <br>
+          <p>Yours Truly, Cody</p>
+        </div>
+        <div class="nav">
+          <button onclick="prevPage()">Back</button>
+          <span class="page-num">2 / 19</span>
+          <button onclick="nextPage()">Next</button>
+        </div>
+      </div>
+
+
+      <!-- LETTER 3 -->
+      <div class="page" data-page="4">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head">
+            <span>September 2, 2042</span>
+            <span>344 Ethathya Street, Peratef City, Savarov</span>
+          </div>
+          <h2>Hii Cody!!</h2>
+          <p>Thanks again for the help between the rumors!! i was already suspicous of Ossa and Luo but i never actually expected then to get this low! I was able to get in touch with Sir Diago and seems like they got punished for everything. Im just glad you were able to tell me, alongside Ruth, Amica, Corwin and Samir. yall are the best</p>
+          <p>Thanks again for the help between the rumors!! i was already suspicious of Ossa and Luo but i never actually expected them to get this low! I was able to get in touch with Sir Diago and seems like they got punished for everything. Im just glad you were able to tell me, alongside Ruth, Amica, Corwin and Samir. yall are the best <3, anyways wanna hang out later on? i got the new game console to try out, yes I KNOW youre going to ask me about my money, do not worry!! my parents got it covered since my birthday is coming in a week anyway.. can.. can you cook the lasagna.. please? My parents really want your family to be there..! they wanna talk about anything at this point.  but anyway, just tell me if you wanna go there at my home, im pretty sure everyone else will be there!</p>
+          <p> Loveee, Winfred </p>
+        </div>
+        <div class="nav">
+          <button onclick="prevPage()">Back</button>
+          <span class="page-num">3 / 19</span>
+          <button onclick="nextPage()">Next</button>
+        </div>
+      </div>
+
+      <!-- LETTER 4 -->
+      <div class="page cursive crumple-light" data-page="5">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>September 8, 2042</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Happy Birthday Winfred!</h2>
+          <p>Happy birthday yet again, Winfred! Wow! I actually can't believe you're 16 now. You're still younger than me, haha, but still, I am so happy for you and your family. You're growing up really well and you're able to handle yourself more often. I was actually scared that you'd stay immature, hehe... but no worries — me and the rest will do something special tomorrow. Just wait until you find out... ;)</p>
+          <p>In my own words, I am still so grateful each year for your presence in my life. Each year, I get closer to people. I used to be rude and annoying, haha... but I am so glad you affected me. You've been too kind to everyone and have always been open to me and the friend group. You've been nice and thoughtful to others, and always had a way to comfort anyone on a bad day. You're seriously the best person anyone could have. I still thank you for everything — I just keep hoping that we stay together and have fun with our lives as brothers.</p>
+          <p>Plan-wise, all of "The Baby Bashers" GC will come with a surprise... good luck, you might cry or scream... maybe both? You're unpredictable anyway. I will bring the lasagna like you asked me to, cooked the way you wanted it, hehehe. I'm pretty sure the others got their food as well, so we just wait and see.</p>
+          <p>Sincerely, Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">4 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 5 -->
+      <div class="page crumple-medium" data-page="6">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>September 10, 2042</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>THANKS YOU CODYY</h2>
+          <p>Holy shit??!? YALL PLANNED THAT OUT?? oh my gooshhh that was the best birthday everr. My parents were shocked on how good that was what?? when did you even get this idea with the rest lmao?? </p>
+          <p>Youre telling me you guys did a whole act after dinner, making the most unhinged shit and still making it appropriate within my home. I had check every possible reference you guys did cuz whh??? The jokes landed well and were even perfectly timed, the fact yall didnt break character once was amusing. Without the act, the whole night was amazing and all of the moments we had with the games, fun shit and stuff were amazing.</p>
+          <p>I seriously cant thank you enough for it, and im so happy you enjoyed there as well! dont do this everytime or else i will cry and scream like you said</p>
+          <p>By Mr. Poopy, Winfred</p>
+          <br><br><br><p>Ps.. still thank you</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">5 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 6 -->
+      <div class="page cursive crumple-heavy" data-page="7">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>November 24, 2042</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Happy Autumn, Winfred</h2>
+          <p>My parents and I would love to invite you and your family over for Thanksgiving. If you've already prepared your food, please save it for now if you want to join us. It would be our greatest pleasure to have you here.</p>
+          <p>Yeah, I know, it's a bit formal, but aside from that, I just want you to stay with us and chat for a while. School has been busy for all of us, and I think we need a well-deserved break after all that chaos. Would you be able to stop by?</p>
+          <p>Also, have you heard about the government safety issues? I feel bad for the officials — they're always trying their hardest when it comes to the community's problems. They don't seem to catch a break from the mess people made! Well... I suppose we can talk about it if you get here. If not, we can talk at school.</p>
+          <p>Wishes from Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">6 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 7 -->
+      <div class="page crumple-light" data-page="8">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>January 9, 2043</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>HAPPY BIRTHDAY CODY!!</h2>
+          <p>Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!Happy Birthday Cody!</p>
+          <p>Sorry i really dont have much words to describe that youre turning 17 now, woohoooo! this is very short but im pretty sure there'll be a surprise later hehehe. Also im sure we're going to be extra busy so our letters would definitely be less lolz </p>
+          <p> Also yeah, the government is really struggling to take care of the community and people. That criminal bombing during the Christmas event in Guidavo City scared me, but im glad there were little casualties though..</p>
+          <p>Happy Birthday again Cody, From Winfred</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">7 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 8 -->
+      <div class="page cursive crumple-medium" data-page="9">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>July 15, 2043</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Hello Winfred</h2>
+          <p>I'm sure you're aware of this, but did you see those people earlier? They were suspicious back at the mall. Sorry, I just feel less safe now with the growing crime rates so my family and I have been taking extra precautions. Nonetheless, I hope you and your family are safe for the time being, as well as the rest of "The Baby Bashers" GC. Next week, we can hang out for a picnic if you want; I will message the rest about it.</p>
+          <p>Just for the two of us, can we go shopping later? I think I have some extra money if you really want to buy something — it's free, don't even worry about the expenses. You know my family. After all, we haven't done that in a while, and there's a new clothing area at the Royaka Mall. Don't forget about the summer sales, by the way! Yes I know this is very short haha..</p>
+          <p>Sincerely, Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">8 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 9 -->
+      <div class="page crumple-heavy" data-page="10">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>January 1, 2044</span><span>377 Valerea Street, Tagwapera City, Savarov</span></div>
+          <h2>Cody and Jarred</h2>
+          <p style="font-family:'Caveat', cursive; font-size:26px; line-height:1.6; color:#2b2216;">I can't believe it has been so many years of our friendship and that we're turning into adults already. We've come so far, and it's breathtaking that we've still been together for eleven years. To this day, I'm so proud of us — we really are growing up. Although I want us to progress in our lives, I am still worried about the problems we might face in the future. But nonetheless, I want the best for us.</p>
+    
+    <!-- Second p = normal (typewriter) -->
+    <p style="font-family:'Special Elite', monospace; font-size:19px;">I like to write in here that, everything we had done will always be part of me and i will never forget about it. I aint much of a writer, nor cant i have some special little quote unlike you, but i just know that i wanna make new memories with you again</p>
+   <p style="font-family:'Caveat', cursive; font-size:26px; line-height:1.6; color:#2b2216;">By...</p>
+ <p style="font-family:'Special Elite', monospace; font-size:19px;">Winfred and Cody <3</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">9 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 10 -->
+      <div class="page cursive crumple-light" data-page="11">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>April 6, 2044</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Hi, Winfred</h2>
+          <p>Just checking up on you. I suppose we haven't really used the letters much now that I think about it, haha... but I do agree that we've been busy after all. Please do tell me at school because I am highly concerned once again due to the rise in criminal cases. No one can catch a break! But hopefully, we will be able to help out once we get jobs, haha...</p>
+          <p>Do you mind if we eat at the Kimbap area I mentioned? It could help with the stress everyone's been getting. Also, yeah, you're paying for this one... maybe at least a few. I still can't help but pay for food.</p>
+          <p>Sincerely, Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">10 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 11 -->
+      <div class="page crumple-medium" data-page="12">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>December 5, 2044</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>Merry Christmas, Cody!</h2>
+          <p>I left this note since Christmas is coming up and i want you to know that i am here for your christmas timee!! hehe. Just be sure to drink up with warm drinks and eat warm food because i know damn well you get sick easily and the cold doesnt help you at all. but tbh its kinda funny how you just lay in bed feeling miserable. I stocked up with the medicine ready and i know your favorite chewable dog treat medicine i know i know.. but stay safe for me mkay??</p>
+          <p>Also do keep in mind the Christmas party at 12, PLEASE remind us to clean up again. It really helps with everyones laziness XD. Sir might kill us by then so just watch out and tell us ASAP</p>
+          <p>Enjoy your merriful christmas!! </p>
+          <p>Yours Truly, Winfred </p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">11 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 12 -->
+      <div class="page cursive crumple-heavy" data-page="13">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>August 12, 2045</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Can we talk later?</h2>
+          <p>I know what I did back then was horrible. I'm sorry... maybe it was too harsh for me to say that. I never thought it could lead to this. I know, I was wrong to react that way. Can we just talk later? I'm not expecting you to forgive me or anything, but if you're willing to stay for a moment, maybe we could understand each other more? I really hope you feel better after this.</p>
+          <p>What you did was excusable and understandable. I should've never expected more from you, and I knew you were stressed out back then. I don't have much of an excuse anyway, I am at fault. So I'm asking you one last time if you'd like to talk. You don't have to answer back, I know. Take your time and have your own space.</p>
+          <p>I appreciate that you're reading this until now... that is, if you are.</p>
+          <p>Sorry again, Winfred</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">12 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 13 -->
+      <div class="page crumple-light" data-page="14">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>October 1, 2045</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>Happy Halloween Cody!</h2>
+          <p>Tommorow lets go trick or treating!! Theres going to be many events within Tagwapera City so you already know our usual spot hhehehe!! So we could probably scare off kids there or just grab as much candy as possible? I already know youre going to be a vampire so ill just be a werewolf for funsiess. Also bring your car by then, we will probably need that for the amount of candy we might collect</p>
+          <p>Speaking about your car, we should probably get a few parking spots early since theres going to be a large crowd within the area. I dont want you stressing out over idiots you call while you drive lol. Im still surprised how you were able to learn driving so fast. youre basically a natural at it by now. Your little road rage episodes are always amusing especially when you curse, didnt know you got it in ya XD</p>
+          <p>All jokes aside, stay safe yet again. Crime rates might grow once more in crowds, but im sure that the government can handle it this time. They have been more aware and reinforcing their police executives. Theyre really  nice people actually! i met one of them before and they took my jokes very well</p>
+          <p>Once again im ready to meet up for halloween blehh</p>
+          <p>Spooky Month time from Winfred</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">13 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 14 -->
+      <div class="page cursive crumple-medium" data-page="15">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>May 3, 2046</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Happy Spring, Winfred!</h2>
+          <p>Although it may feel like we've gotten too busy with our lives, I think it's safe to say that the spring event game releases are going to be amazing. I hope you've been saving up money, and if you haven't, I still have enough to spare, haha... Seriously though, the sales are going to be crazy once they drop. Prepare food and water for the long lines and crowds at the stores.. well it could get serious.</p>
+          <p>In my opinion, I really want to buy "Tales of Gervurdulak." The story looks amazing and the visuals are pretty good! I might as well get the collector's items or posters even the figurines and merch? It's up to you if you want some extra. Otherwise, I can't wait for more!</p>
+          <p>I'll ask Corwin and Ruth if they want to join in. After all, they're pretty much the geeks in our friend group. I might plan on paying for everyone's wants, maybe 2-3 items per person depending on the price. Corwin told me he wants all the mommy figurines and I can't stop him from salivating over them, haha... Ruth seems neutral overall, but I see him looking at the masculine armored characters for some reason. Might ask him later.</p>
+          <p>Like I said, be sure to get extra food and water since people might harass and attack each other during the spring. I'm pretty sure we already know this, right? Also, yeah, the police are nice people. They're very soft and don't seem to bother anyone just messing around. Honestly, I think they're too soft for their own good.</p>
+          <p>Enjoy Spring... Love, Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">14 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 15 -->
+      <div class="page crumple-heavy" data-page="16">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>June 8, 2046</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>Beach timee yayayy</h2>
+          <p>Finally we get to have a break from all that, whew! you excited again for summer? im very sure you wanna party at the beach already, theres going to be so many cool things happening and it looks like the Westa's are making a new album with 8 songs :D. Thanks again for all the paying and money, i dont even know how your family always seems to be able to afford the kinda things even if you told me already that your parents and grandparents were well known and rich overall!</p>
+          <p>The fact your even humble scares me cuz i wouldnt have known that you were rich from all your simple life style and selflessness. But!! anywayss The Baby bashers are going to meet up at the beach resort we mentioned, theres going to be a swimming pool if you dont want to swim in the ocean, or theres a relaxation massage area and i think the resturants and the bar serve well from what i saw. Hopefully our plan can be good and well and maybe theres a chance for extending our time hehe.</p>
+          <p>I have checked its backgrounds and history and it seems they got no cases of criminal behavior there, so we are pretty much in the clear. I already know youre going to ask me that later so dont worry! You can be careful but just dont stress yourself out. Also guess who brought your favorite treats?? i know you love to chew on them bones hhehe.</p>
+          <p>Meet up 9 am at the bus station, dont wear your beach outfit yet! I swear if you dont wear your casual clothes...</p>
+          <p>Le Summer time!! best of luck by Winfred</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">15 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 16 -->
+      <div class="page cursive crumple-light" data-page="17">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>March 17, 2047</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Hello Winfred</h2>
+          <p>This is just a quick thought and I know it sounds absurd.. please talk to me if you want to help out, remember to stay safe. It's just something about the recent case files. We never really get any safer around our areas huh? Maybe I am a worried word haha.. I'll meet up with you soon , I promise.</p>
+          <p>Sincerely, Cody</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">16 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 17 -->
+      <div class="page crumple-medium" data-page="18">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>July 30, 2047</span><span>344 Ethathya Street, Peratef City, Savarov</span></div>
+          <h2>Yo Cody!</h2>
+          <p>just checking in.. you fine ?? if you arent i will slime you out XD</p><p>im pretty sure we've got nothing much happening, this year was quite boring in the earlier months. but.. hoping the next few months will be better!</p>
+          <p>Also, dont forget your hydration, food, sleep and time with yourself. i dont wanna see you struggling everywhere i see you lol. Let's play some games later on if you wanna, dont care dont know what to do anyways</p>
+          <p>Im bored - Winfred</p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">17 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 18 -->
+      <div class="page cursive crumple-heavy" data-page="19">
+        <div class="paper-fiber"></div>
+        <div class="letter">
+          <div class="letter-head"><span>October 17, 2047</span><span>721 Gumaclod Street, Nevashwick City, Savarov</span></div>
+          <h2>Hello Winfred</h2>
+          <p>Are you excited with the following competitions of our school events? I can't wait to see everyone's hard work being shown to different levels and sections! This is by far the biggest event we ever gotten and I'm so glad that our batch was able to make this. There's going to have sports, math and science game shows, engineering and computer robots, art showcases, book stories and reading, and probably more. I really wan't us to support each other and I wan't you and your team to be credited with the supplies and creative things you've made for everything. </p>
+          <p>Please root for me in the play-act competition.. I beg of you :'(. But in all seriousness, support anyone you love and always be open to share your criticism on us. I really hope you enjoy every part of the story Amica made, especially some parts of the jokes. One thing I would share is that there will be a plot twist at the end so look around for any sort of foreshadowing and detail..</p>
+          <p>I also wan't your art designs to win the competition, how did you learn to implement that into a website page with images and videos? Did you actually take note on what I said about my computer rambling? If so, I didnt expect that! You always surprise me huh?</p>
+          <p>After all of that, You want to come over my house? It's pretty free anyway, and besides we can just relax and release all the tension after the whole day.</p>
+          <p>Sincerely, Cody </p>
+        </div>
+        <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">18 / 19</span><button onclick="nextPage()">Next</button></div>
+      </div>
+
+      <!-- LETTER 19 - TEAR STAINED -->
+ <div class="page cursive tears crumple-heavy" data-page="20">
+        <div class="paper-fiber"></div>
+        <div class="tear-stain one"></div><div class="tear-stain two"></div><div class="tear-stain three"></div>
+        <div class="letter">
+          <div class="letter-head"><span>February 9, 2048</span><span>Mercy Hospital, Nevashwick City, Savarov</span></div>
+          <h2>I am sorry.</h2>
+          <p>A new year has passed by, Winfred. I'm still at the hospital recovering, though my recovery is almost done... I still cant stop remembering on that day. I could've done something better to save you, I didn't know what I was doing, one moment I thought we were in the clear then.. you were stabbed infront of my own eyes. I tried reaching out to you, I really did but it only put a scar on my face. The terrorist attack was unexpected but planned out fully, I should've been more aware. I had no choice but to kill HIM, that ℜ𝔒𝔄ℭℌ, your killer. I didn't know I was able to fight back, I've got his blood on my hands and I could never lose it.  </p>
+          <p>The school is being rebuilt once more, and the damages are being fixed by the government. Your parents miss you, everyone misses you, but so many things have changed already. Ruth left the city and lived in another place, he doesn't talk to us anymore. Amica already moved to another country and wants her own space now. Corwin left our school, barely contacting us, and Samir got new friends to talk to. I respect them really, I understand things change, I guess that only counts for other people, not you. Every person has been working hard in their efforts to help, yet here I am, barely able to walk, barely able to use my strength. </p>
+          <p>I still remember your cold body when I carried it, your lifeless face, your empty expression, weak arms and legs. I don't want anyone else to go through what had happened. I'm still scared, still scared for the people I'm close with, I don't want to lose them.. not like you. I distance myself to make it hurt less. I still hope everyone else recovers and does better in life. Don't worry though, made sure your last wish was kept, your body is with the tree we know well together.</p>
+          <p>I promise you.. if you still trust me. I'll take care of the tree, I will water it, adjust the soil, remove weeds and more. I'll make sure our letters stay hidden within the bark of the wood if it means I'm taking care of you. If I'm done, I'll be someone that could save lives, stop crime and stop pain from happening. May you rest easy my friend and brother.</p>
+          <p>From the Love of Cody</p>
+
+  </div>
+  <div class="nav"><button onclick="prevPage()">Back</button><span class="page-num">19 / 19</span></div>
+</div>
+
+    </div>
+  </div>
+
+<script>
+  const errorMessages = [
+    "That doesn't seem to be the right ingredient.",
+    "It doesn't seem to blow that direction.",
+    "You forgot my name already?",
+    "You forgot his name already?"
+  ];
+
+  const totalPages = 20;
+  let current = 1;
+  let errorIndex = 0;
+  let typingTimers = [];
+
+  function checkPass() {
+    const passInput = document.getElementById("passInput");
+    const error = document.getElementById("errorMsg");
+    const input = passInput.value.trim().toLowerCase();
+
+    if (input === "cinnamon wind") {
+      error.textContent = "";
+      error.classList.remove("show");
+      current = 2;
+      updatePages();
+    } else {
+      error.textContent = errorMessages[errorIndex];
+      error.classList.add("show");
+      errorIndex = (errorIndex + 1) % errorMessages.length;
+      passInput.value = "";
+      passInput.focus();
+    }
+  }
+
+  function clearTyping() {
+    typingTimers.forEach(timer => clearTimeout(timer));
+    typingTimers = [];
+  }
+
+  function typePage(pageEl) {
+    clearTyping();
+
+    if (!pageEl || pageEl.classList.contains("cover")) {
+      return;
+    }
+
+    const elements = pageEl.querySelectorAll(".letter h2, .letter p");
+
+    elements.forEach(element => {
+      if (!element.dataset.original) {
+        element.dataset.original = element.textContent;
+      }
+
+      element.textContent = "";
+    });
+
+    let elementIndex = 0;
+
+    function typeElement() {
+      if (elementIndex >= elements.length) {
+        return;
+      }
+
+      const element = elements[elementIndex];
+      const fullText = element.dataset.original;
+      const isCursive = pageEl.classList.contains("cursive");
+      const speed = isCursive ? 10 : 7
+      ;
+      const chunkSize = isCursive ? 2 : 2;
+      let characterIndex = 0;
+
+      function typeCharacter() {
+        if (characterIndex < fullText.length) {
+          characterIndex += chunkSize;
+          element.textContent = fullText.substring(0, characterIndex);
+
+          const timer = setTimeout(typeCharacter, speed);
+          typingTimers.push(timer);
+        } else {
+          element.textContent = fullText;
+          elementIndex++;
+
+          const timer = setTimeout(typeElement, 40);
+          typingTimers.push(timer);
+        }
+      }
+
+      typeCharacter();
+    }
+
+    typeElement();
+  }
+
+  function updatePages() {
+    clearTyping();
+
+    document.querySelectorAll(".page").forEach(page => {
+      const pageNumber = Number(page.dataset.page);
+
+      page.classList.remove("active", "prev");
+
+      if (pageNumber === current) {
+        page.classList.add("active");
+
+        const timer = setTimeout(() => typePage(page), 150);
+        typingTimers.push(timer);
+      } else if (pageNumber < current) {
+        page.classList.add("prev");
+      }
+    });
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth"
+    });
+  }
+
+  function nextPage() {
+    if (current > 1 && current < totalPages) {
+      current++;
+      updatePages();
+    }
+  }
+
+  function prevPage() {
+    if (current > 1) {
+      current--;
+      updatePages();
+    }
+  }
+</script>
+
+</body>
+</html>
